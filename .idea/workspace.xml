@@ -7,6 +7,12 @@
     <list default="true" id="2537d5b9-3a3e-4c9a-a158-909e7ffb3667" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pl/fus/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pl/fus/Order.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/OrderFixed.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/Picker.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pl/fus/Store.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/pl/fus/test.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pl/fus/test.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/self-test-data/logic-bomb/store.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/self-test-data/logic-bomb/store.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +111,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1680377579159</updated>
-      <workItem from="1680377580562" duration="4769000" />
+      <workItem from="1680377580562" duration="16531000" />
     </task>
     <servers />
   </component>
@@ -128,13 +134,28 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/pl/fus/Main.java</url>
-          <line>24</line>
-          <option name="timeStamp" value="5" />
+          <line>153</line>
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/pl/fus/Main.java</url>
-          <line>23</line>
-          <option name="timeStamp" value="6" />
+          <line>128</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pl/fus/Main.java</url>
+          <line>113</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pl/fus/Main.java</url>
+          <line>95</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/pl/fus/Main.java</url>
+          <line>87</line>
+          <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
