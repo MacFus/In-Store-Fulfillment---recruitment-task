@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -91,8 +90,8 @@ public class Main {
 //            ArrayList<Order> orders = prepareListOfOrders(officialList, treeMap, nextOrderAt, store);
 //            System.out.println(orders);
 
-            ordersForPickers(store, treeMap);
-//                findCombination(treeMap, store);
+//            ordersForPickers(store, treeMap);
+                findCombination(treeMap, store);
 
 //            Comparator<Order> orderFixedComparator = Comparator
 //                    .comparing((Order order) -> order.getPickingTime());
@@ -268,8 +267,16 @@ public class Main {
 
     private static ArrayList<Order> findCombination(TreeMap<LocalTime, ArrayList<Order>> orderMap, Store store) {
         long until = store.getPickingStartTime().until(store.getPickingEndTime(), ChronoUnit.MINUTES);
-        orderMap.keySet();
-        for (LocalTime lt : orderMap.keySet()){
+        orderMap.ceilingKey(store.getPickingStartTime());
+        Collection<ArrayList<Order>> orders = orderMap.values();
+        List<Order> orderList = new ArrayList<>();
+        List<Order> tempList = new ArrayList<>();
+        for(ArrayList<Order> order : orders)
+            for(Order o : order)
+                orderList.add(o);
+
+        for (int i = 0; i < orderList.size(); i++) {
+            tempList.add(orderList.get(0));
 
         }
         return null;
