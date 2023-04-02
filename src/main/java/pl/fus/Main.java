@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,7 +90,9 @@ public class Main {
 //            LocalTime nextOrderAt = treeMap.firstKey();
 //            ArrayList<Order> orders = prepareListOfOrders(officialList, treeMap, nextOrderAt, store);
 //            System.out.println(orders);
+
             ordersForPickers(store, treeMap);
+//                findCombination(treeMap, store);
 
 //            Comparator<Order> orderFixedComparator = Comparator
 //                    .comparing((Order order) -> order.getPickingTime());
@@ -123,7 +127,7 @@ public class Main {
         if (list.isEmpty()) {
             start = store.getPickingStartTime();
         } else {
-            start = list.get(list.size()-1).getCompleteBy();
+            start = list.get(list.size() - 1).getCompleteBy();
         }
 //
 //        if (nextOrderAt.compareTo(store.getPickingEndTime()) > 0) {
@@ -145,18 +149,24 @@ public class Main {
                 prepareListOfOrders(list, orderMap, nextOrderAt, store);
             } else {
                 for (Order o : sortedOrders) {
+//                    if (!list.isEmpty()) {
+//                        for (Order orderToFill : sortedOrders){
+//                            orderToFill.
+//                        }
+//                    }
+
                     // if picking time == 0
                     if (o.getPickingTime().isZero()) {
                         o.setPickingStartTime(start);
                         list.add(o);
                         orderMap.get(nextOrderAt).remove(o);
-                    // if picking time != 0
+                        // if picking time != 0
                     } else {
                         //check if it's possible to complete order
-                        if (nextOrderAt.compareTo(store.getPickingEndTime()) > 0 )
+                        if (nextOrderAt.compareTo(store.getPickingEndTime()) > 0)
                             return list;
                         // if contains but cant complete order
-                        if( start.plus(sortedOrders.get(0).getPickingTime()).isBefore(store.getPickingEndTime())){
+                        if (start.plus(sortedOrders.get(0).getPickingTime()).isBefore(store.getPickingEndTime())) {
                             o.setPickingStartTime(start);
                             list.add(o);
                             orderMap.get(nextOrderAt).remove(o);
@@ -164,26 +174,14 @@ public class Main {
                             break;
 
                         }
-                            return list;
+                        return list;
 
                     }
                 }
                 prepareListOfOrders(list, orderMap, nextOrderAt, store);
             }
         }
-//        else if (orderMap.lastEntry().getKey().equals(orderMap.ceilingKey(nextOrderAt))) {
-//            List<Order> sortedOrders = sortOrders(orderMap, nextOrderAt);
-//            for(Order o : sortedOrders){
-//                if(start.plus(o.getPickingTime()).isBefore(store.getPickingEndTime())){
-//                    o.setPickingStartTime(start);
-//                    list.add(o);
-//                    orderMap.remove(o);
-//                    break;
-//                }
-//
-//            }
-//            return list;
-//        }
+
         // map doesnt contain key
         else {
             // if last key from the map is lower than nextOrderAt return list
@@ -266,6 +264,15 @@ public class Main {
                 .sorted(Comparator.comparing(Order::getPickingTime))
                 .collect(Collectors.toList());
         return (ArrayList<Order>) sortedOrders;
+    }
+
+    private static ArrayList<Order> findCombination(TreeMap<LocalTime, ArrayList<Order>> orderMap, Store store) {
+        long until = store.getPickingStartTime().until(store.getPickingEndTime(), ChronoUnit.MINUTES);
+        orderMap.keySet();
+        for (LocalTime lt : orderMap.keySet()){
+
+        }
+        return null;
     }
 }
 
