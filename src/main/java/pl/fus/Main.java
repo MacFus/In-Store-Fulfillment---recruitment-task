@@ -17,7 +17,9 @@ public class Main {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
 //        String test_data_file = "complete-by";
+//        String test_data_file = "optimize-order-count";
         String test_data_file = "logic-bomb";
+//        String test_data_file = "advanced-allocation";
         String orderPath = String.format("src/main/resources/self-test-data/%s/orders.json", test_data_file);
         String storePath = String.format("src/main/resources/self-test-data/%s/store.json", test_data_file);
 
@@ -61,18 +63,17 @@ public class Main {
             }
 
             //Filtrowanie mapy w godzinach kompletowania zamowień
-            Set<Map.Entry<LocalTime, ArrayList<Order>>> orderSet = orderMap.entrySet()
+            Map<LocalTime, ArrayList<Order>> orderHashMap = orderMap.entrySet()
                     .stream()
                     .filter(record -> record.getKey().compareTo(store.getPickingStartTime()) >= 0)
                     .filter(record -> record.getKey().compareTo(store.getPickingEndTime()) <= 0)
 //                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                     .collect(
-                            Collectors.toMap(
-                                    Map.Entry::getKey,
-                                    Map.Entry::getValue,
-                                    (oldValue, newValue) -> newValue,
-                                    TreeMap::new)
-                    ).entrySet();
+                            Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
+                    );
+            TreeMap<LocalTime, ArrayList<Order>> treeMap = new TreeMap<LocalTime, ArrayList<Order>>();
+            treeMap.putAll(orderHashMap);
+
             //collect wypluwa uporządkowaną liste poprawnych wynikow
 
 
@@ -85,8 +86,8 @@ public class Main {
                     */
 
             ArrayList<Order> officialList = new ArrayList<>();
-            LocalTime nextOrderAt = orderSet.iterator().next().getKey();
-            ArrayList<Order> orders = prepareListOfOrders(officialList, orderSet, nextOrderAt);
+            LocalTime nextOrderAt = treeMap.firstKey();
+            ArrayList<Order> orders = prepareListOfOrders(officialList, treeMap, nextOrderAt, store.getPickingEndTime());
             System.out.println(orders);
 //            if (!orderSet.isEmpty() && orderSet.iterator().hasNext()) {
 //                //sortowanie orderów na daną godzine po pickingTime
@@ -105,7 +106,6 @@ public class Main {
 //                    }
 //                }
 //            }
-            System.out.println();
 //            Set<Map.Entry<LocalTime, ArrayList<Order>>> entries = collect.entrySet();
 
 //            Map<LocalTime, ArrayList<Order>> treeMap = collect.entrySet()
@@ -120,7 +120,7 @@ public class Main {
 //                    );
 
             //Lista w danych godzinach
-//            Map<LocalTime, ArrayList<OrderFixed>> collect2 = orderMap.entrySet()
+//            Map<LocalTime, ArrayList<Order>> collect2 = orderMap.entrySet()
 //                    .stream()
 //                    .filter(record -> record.getKey().compareTo(LocalTime.of(9, 10)) >= 0)
 //
@@ -152,8 +152,6 @@ public class Main {
 //
 //            Collections.sort(orderFixedList, orderFixedComparator);
 
-            System.out.println();
-
 //            //
 //            String store_string = new String(Files.readAllBytes(Paths.get(storePath)));
 ////            Store store = new Gson().fromJson(store_string, Store.class);
@@ -164,28 +162,35 @@ public class Main {
 
     }
 
-    public static ArrayList<Order> prepareListOfOrders(ArrayList<Order> list, Set<Map.Entry<LocalTime, ArrayList<Order>>> orderSet, LocalTime nextOrderAt) {
-        while (!orderSet.isEmpty() && orderSet.iterator().hasNext()) {
-            //sortowanie orderów na daną godzine po pickingTime
-//            if(orderSet.contains())
-            Map.Entry<LocalTime, ArrayList<Order>> order = orderSet.iterator().next();
-            List<Order> sortedOrders = order.getValue()
+    public static ArrayList<Order> prepareListOfOrders(ArrayList<Order> list, TreeMap<LocalTime, ArrayList<Order>> orderMap, LocalTime nextOrderAt, LocalTime endOfPacking) {
+        if (nextOrderAt.isBefore(endOfPacking)) {
+            nextOrderAt = orderMap.ceilingKey(nextOrderAt);
+            ArrayList<Order> orderArrayList = orderMap.get(nextOrderAt);
+//        while (!orderMap.isEmpty() && orderMap.iterator().hasNext()) {
+//            //sortowanie orderów na daną godzine po pickingTime
+////            if(orderSet.contains())
+//            Map.Entry<LocalTime, ArrayList<Order>> order = orderMap.iterator().next();
+            List<Order> sortedOrders = orderArrayList
                     .stream()
                     .sorted(Comparator.comparing(Order::getPickingTime))
                     .collect(Collectors.toList());
             for (int i = 0; i < sortedOrders.size(); i++) {
                 if (sortedOrders.get(i).getPickingTime().isZero()) {
                     list.add(sortedOrders.get(i));
+                    orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
                 } else {
+                    if (nextOrderAt.compareTo(endOfPacking) >= 0)
+                        return list;
                     list.add(sortedOrders.get(i));
+                    orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
                     nextOrderAt = nextOrderAt.plus(sortedOrders.get(i).getPickingTime());
-                    orderSet.remove(order);
+
                     break;
                 }
             }
-            prepareListOfOrders(list, orderSet, nextOrderAt);
+            prepareListOfOrders(list, orderMap, nextOrderAt, endOfPacking);
         }
         return list;
     }
-
 }
+
