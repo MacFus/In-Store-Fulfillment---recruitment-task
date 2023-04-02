@@ -15,6 +15,7 @@ public class Order {
     private double orderValue;
     private Duration pickingTime;
     private LocalTime completeBy;
+    private LocalTime pickingStartTime;
 
     public Order(OrderWithStrings order) {
         this.orderId = order.getOrderId();
@@ -26,6 +27,10 @@ public class Order {
 
     private int transformToMinFormat(String time) {
         return time.equals("PT0S") ? 0 : Integer.parseInt(time.replace("PT", "").replace("M", ""));
+    }
+
+    public void setPickingStartTime(LocalTime pickingStartTime) {
+        this.pickingStartTime = pickingStartTime;
     }
 
     @Override

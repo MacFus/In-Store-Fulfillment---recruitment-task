@@ -5,21 +5,25 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-//        String test_data_file = "complete-by";
-//        String test_data_file = "optimize-order-count";
-        String test_data_file = "logic-bomb";
+        // OK: complete-by, isf-end-time, any-order-length-is-ok, optimize-order-count
 //        String test_data_file = "advanced-allocation";
+        String test_data_file = "advanced-optimize-order-count";
+//        String test_data_file = "advanced-optimize-order-value";
+//        String test_data_file = "logic-bomb";
+//        String test_data_file = "optimize-order-value";
+
+//        String test_data_file = "optimize-order-count";
+//        String test_data_file = "any-order-length-is-ok";
+//        String test_data_file = "complete-by";
+//        String test_data_file = "isf-end-time";
         String orderPath = String.format("src/main/resources/self-test-data/%s/orders.json", test_data_file);
         String storePath = String.format("src/main/resources/self-test-data/%s/store.json", test_data_file);
 
@@ -71,12 +75,7 @@ public class Main {
                     .collect(
                             Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
                     );
-            TreeMap<LocalTime, ArrayList<Order>> treeMap = new TreeMap<LocalTime, ArrayList<Order>>();
-            treeMap.putAll(orderHashMap);
-
-            //collect wypluwa uporządkowaną liste poprawnych wynikow
-
-
+            TreeMap<LocalTime, ArrayList<Order>> treeMap = new TreeMap<>(orderHashMap);
 
             /*
             List<Student> sorted = students.stream()
@@ -85,46 +84,11 @@ public class Main {
                     .collect(Collectors.toList())
                     */
 
-            ArrayList<Order> officialList = new ArrayList<>();
-            LocalTime nextOrderAt = treeMap.firstKey();
-            ArrayList<Order> orders = prepareListOfOrders(officialList, treeMap, nextOrderAt, store.getPickingEndTime());
-            System.out.println(orders);
-//            if (!orderSet.isEmpty() && orderSet.iterator().hasNext()) {
-//                //sortowanie orderów na daną godzine po pickingTime
-//                List<Order> sortedOrders = orderSet.iterator().next().getValue()
-//                        .stream()
-//                        .sorted(Comparator.comparing(Order::getPickingTime))
-//                        .collect(Collectors.toList());
-////                nextOrderAt
-//                for (int i = 0; i < sortedOrders.size(); i++) {
-//                    if (sortedOrders.get(i).getPickingTime().isZero()) {
-//                        test.add(sortedOrders.get(i));
-//                    } else {
-//                        test.add(sortedOrders.get(i));
-////                         nextOrderAt = sortedOrders.get(i).getPickingTime().plus(sortedOrders.get(i).getPickingTime());
-//                        break;
-//                    }
-//                }
-//            }
-//            Set<Map.Entry<LocalTime, ArrayList<Order>>> entries = collect.entrySet();
-
-//            Map<LocalTime, ArrayList<Order>> treeMap = collect.entrySet()
-//
-//                    .stream()
-//                    .collect(
-//                            Collectors.toMap(
-//                                    Map.Entry::getKey,
-//                                    Map.Entry::getValue,
-//                                    (oldValue, newValue) -> newValue,
-//                                    TreeMap::new)
-//                    );
-
-            //Lista w danych godzinach
-//            Map<LocalTime, ArrayList<Order>> collect2 = orderMap.entrySet()
-//                    .stream()
-//                    .filter(record -> record.getKey().compareTo(LocalTime.of(9, 10)) >= 0)
-//
-//                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//            ArrayList<Order> officialList = new ArrayList<>();
+//            LocalTime nextOrderAt = treeMap.firstKey();
+//            ArrayList<Order> orders = prepareListOfOrders(officialList, treeMap, nextOrderAt, store);
+//            System.out.println(orders);
+            ordersForPickers(store, treeMap);
 
 //            Comparator<Order> orderFixedComparator = Comparator
 //                    .comparing((Order order) -> order.getPickingTime());
@@ -135,11 +99,6 @@ public class Main {
 //                List<Order> tempOrderFixed = treeMap.get(t);
 ////                tempOrderFixed.stream().min(Comparator.comparingInt(value -> value.getPickingTime()));
 //            }
-
-//            pickOrders(treeMap);
-
-
-//            employeeOrderList.a
 
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
@@ -152,45 +111,161 @@ public class Main {
 //
 //            Collections.sort(orderFixedList, orderFixedComparator);
 
-//            //
-//            String store_string = new String(Files.readAllBytes(Paths.get(storePath)));
-////            Store store = new Gson().fromJson(store_string, Store.class);
-        } catch (IOException e) {
+        } catch (IOException | StackOverflowError e) {
             e.printStackTrace();
         }
 
 
     }
 
-    public static ArrayList<Order> prepareListOfOrders(ArrayList<Order> list, TreeMap<LocalTime, ArrayList<Order>> orderMap, LocalTime nextOrderAt, LocalTime endOfPacking) {
-        if (nextOrderAt.isBefore(endOfPacking)) {
-            nextOrderAt = orderMap.ceilingKey(nextOrderAt);
-            ArrayList<Order> orderArrayList = orderMap.get(nextOrderAt);
-//        while (!orderMap.isEmpty() && orderMap.iterator().hasNext()) {
-//            //sortowanie orderów na daną godzine po pickingTime
-////            if(orderSet.contains())
-//            Map.Entry<LocalTime, ArrayList<Order>> order = orderMap.iterator().next();
-            List<Order> sortedOrders = orderArrayList
-                    .stream()
-                    .sorted(Comparator.comparing(Order::getPickingTime))
-                    .collect(Collectors.toList());
-            for (int i = 0; i < sortedOrders.size(); i++) {
-                if (sortedOrders.get(i).getPickingTime().isZero()) {
-                    list.add(sortedOrders.get(i));
-                    orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
-                } else {
-                    if (nextOrderAt.compareTo(endOfPacking) >= 0)
-                        return list;
-                    list.add(sortedOrders.get(i));
-                    orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
-                    nextOrderAt = nextOrderAt.plus(sortedOrders.get(i).getPickingTime());
+    public static ArrayList<Order> prepareListOfOrders(ArrayList<Order> list, TreeMap<LocalTime, ArrayList<Order>> orderMap, LocalTime nextOrderAt, Store store) {
+        LocalTime start;
+        if (list.isEmpty()) {
+            start = store.getPickingStartTime();
+        } else {
+            start = list.get(list.size()-1).getCompleteBy();
+        }
+//
+//        if (nextOrderAt.compareTo(store.getPickingEndTime()) > 0) {
+//            System.out.println("Next order after pickingEndTime");
+//            return list;
+//        }
 
-                    break;
+//        else if (nextOrderAt.compareTo(store.getPickingEndTime()) == 0) {
+//        }
+
+
+        // map contains key
+        if (orderMap.containsKey(nextOrderAt)) {
+            List<Order> sortedOrders = sortOrders(orderMap, nextOrderAt);
+
+            // no more orders at that time
+            if (sortedOrders.isEmpty()) {
+                orderMap.remove(nextOrderAt);
+                prepareListOfOrders(list, orderMap, nextOrderAt, store);
+            } else {
+                for (Order o : sortedOrders) {
+                    // if picking time == 0
+                    if (o.getPickingTime().isZero()) {
+                        o.setPickingStartTime(start);
+                        list.add(o);
+                        orderMap.get(nextOrderAt).remove(o);
+                    // if picking time != 0
+                    } else {
+                        //check if it's possible to complete order
+                        if (nextOrderAt.compareTo(store.getPickingEndTime()) > 0 )
+                            return list;
+                        // if contains but cant complete order
+                        if( start.plus(sortedOrders.get(0).getPickingTime()).isBefore(store.getPickingEndTime())){
+                            o.setPickingStartTime(start);
+                            list.add(o);
+                            orderMap.get(nextOrderAt).remove(o);
+                            nextOrderAt = nextOrderAt.plus(o.getPickingTime());
+                            break;
+
+                        }
+                            return list;
+
+                    }
                 }
+                prepareListOfOrders(list, orderMap, nextOrderAt, store);
             }
-            prepareListOfOrders(list, orderMap, nextOrderAt, endOfPacking);
+        }
+//        else if (orderMap.lastEntry().getKey().equals(orderMap.ceilingKey(nextOrderAt))) {
+//            List<Order> sortedOrders = sortOrders(orderMap, nextOrderAt);
+//            for(Order o : sortedOrders){
+//                if(start.plus(o.getPickingTime()).isBefore(store.getPickingEndTime())){
+//                    o.setPickingStartTime(start);
+//                    list.add(o);
+//                    orderMap.remove(o);
+//                    break;
+//                }
+//
+//            }
+//            return list;
+//        }
+        // map doesnt contain key
+        else {
+            // if last key from the map is lower than nextOrderAt return list
+            if (orderMap.lastEntry().getKey().isBefore(nextOrderAt))
+                return list;
+//            if(orderMap.lastEntry().getKey().equals(nextOrderAt) && orderMap.get(nextOrderAt).get(0).)
+//            if (!orderMap.containsKey(nextOrderAt) && nextOrderAt.isAfter(store.getPickingEndTime()))
+//
+            // if order key does not exists, try higher value
+            nextOrderAt = orderMap.ceilingKey(nextOrderAt);
+            prepareListOfOrders(list, orderMap, nextOrderAt, store);
         }
         return list;
+    }
+
+
+//        LocalTime startPicking = nextOrderAt;
+//        if (orderMap.containsKey(nextOrderAt)) {
+//
+//            nextOrderAt = orderMap.ceilingKey(nextOrderAt);
+//
+//            List<Order> sortedOrders = sortOrders(orderMap, nextOrderAt);
+//
+//            if (sortedOrders.size() == 0) {
+//                nextOrderAt = orderMap.ceilingKey(nextOrderAt);
+//                orderMap.remove(nextOrderAt);
+//                prepareListOfOrders(list, orderMap, nextOrderAt, store);
+//            } else {
+//                for (int i = 0; i < sortedOrders.size(); i++) {
+//                    if (sortedOrders.get(i).getPickingTime().isZero()) {
+//                        sortedOrders.get(i).setPickingStartTime(startPicking);
+//                        list.add(sortedOrders.get(i));
+//                        orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
+//                    } else {
+//                        if (nextOrderAt.compareTo(store.getPickingEndTime()) >= 0)
+//                            return list;
+//                        sortedOrders.get(i).setPickingStartTime(startPicking);
+//                        list.add(sortedOrders.get(i));
+//                        orderMap.get(nextOrderAt).remove(sortedOrders.get(i));
+//                        nextOrderAt = nextOrderAt.plus(sortedOrders.get(i).getPickingTime());
+//
+//                        break;
+//                    }
+//                    return list;
+//                }
+//            }
+//
+//            prepareListOfOrders(list, orderMap, nextOrderAt, store);
+//        } else {
+//            if (orderMap.ceilingKey(nextOrderAt).equals(null))
+////            nextOrderAt = orderMap.ceilingKey(nextOrderAt);
+////            if (!orderMap.containsKey(nextOrderAt))
+//                return list;
+//            prepareListOfOrders(list, orderMap, nextOrderAt, store);
+//        }
+//
+//        return list;
+//    }
+
+    public static void ordersForPickers(Store store, TreeMap<LocalTime, ArrayList<Order>> orderMap) {
+        Map<String, ArrayList<Order>> map = new HashMap<>();
+        for (String picker : store.getPickers()) {
+            ArrayList<Order> orders1 = new ArrayList<>();
+            ArrayList<Order> orders = prepareListOfOrders(orders1, orderMap, store.getPickingStartTime(), store);
+            map.put(picker, orders);
+        }
+        for (String key : map.keySet()) {
+            for (int i = 0; i < map.get(key).size(); i++) {
+                System.out.println(key + " " + map.get(key).get(i).getOrderId() + " " + map.get(key).get(i).getPickingStartTime());
+            }
+        }
+
+
+    }
+
+    private static ArrayList<Order> sortOrders(TreeMap<LocalTime, ArrayList<Order>> orderMap, LocalTime time) {
+        ArrayList<Order> orderArrayList = orderMap.get(time);
+        List<Order> sortedOrders = orderArrayList
+                .stream()
+                .sorted(Comparator.comparing(Order::getPickingTime))
+                .collect(Collectors.toList());
+        return (ArrayList<Order>) sortedOrders;
     }
 }
 
