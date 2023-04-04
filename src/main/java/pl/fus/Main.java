@@ -15,8 +15,8 @@ public class Main {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         // OK: complete-by, isf-end-time, any-order-length-is-ok, optimize-order-count
-//        String test_data_file = "advanced-allocation";
-        String test_data_file = "advanced-optimize-order-count";
+        String test_data_file = "advanced-allocation";
+//        String test_data_file = "advanced-optimize-order-count";
 //        String test_data_file = "advanced-optimize-order-value";
 //        String test_data_file = "logic-bomb";
 //        String test_data_file = "optimize-order-value";
@@ -91,7 +91,8 @@ public class Main {
 //            System.out.println(orders);
 
 //            ordersForPickers(store, treeMap);
-                findCombination(treeMap, store);
+            advancedAllocation(treeMap, store);
+//            findCombination(treeMap, store);
 
 //            Comparator<Order> orderFixedComparator = Comparator
 //                    .comparing((Order order) -> order.getPickingTime());
@@ -240,6 +241,153 @@ public class Main {
 //        return list;
 //    }
 
+    public static void advancedAllocation(TreeMap<LocalTime, ArrayList<Order>> orderMap, Store store) {
+        Collection<ArrayList<Order>> orders = orderMap.values();
+        ArrayList<Order> orderList = new ArrayList<>();
+        List<Order> tempList = new ArrayList<>();
+        for (ArrayList<Order> order : orders)
+            for (Order o : order)
+                orderList.add(o);
+        Order[] orderArray = new Order[orderList.size()];
+        for (int i = 0; i < orderList.size(); i++) {
+            orderArray[i] = orderList.get(i);
+        }
+        HashMap<String, List<Order>> hashMap = new HashMap<>();
+        HashMap<String, List<Order>> hashMap2 = sortArray(hashMap, store, orderList);
+//        Order[] objects = (Order[]) orderList.toArray();
+        System.out.println();
+    }
+
+    public static HashMap<String, List<Order>> sortArray(HashMap<String, List<Order>> hashMap, Store store, ArrayList<Order> orders) {
+        LocalTime start = store.getPickingStartTime();
+        LocalTime end = store.getPickingEndTime();
+        String[] pickers = new String[store.getPickers().size()];
+        // initialize 'pickers' array with picker names
+        for (int i = 0; i < store.getPickers().size(); i++) {
+            pickers[i] = store.getPickers().get(i);
+        }
+        // start time for each picker
+        // initialize with store.pickingStartTime
+        List<LocalTime> pickersTime = new ArrayList<>(Collections.nCopies(pickers.length, start));
+
+        // sort each time when removing order
+        while (orders.size() != 0) {
+
+            // order ; p1 ; p2
+            //  0       0    0
+            Long[][] pickersTimeAndCompleteByDiff = new Long[orders.size()][pickers.length];
+            HashMap<String, ArrayList<Long>> map = new HashMap<>();
+            for (int i = 0; i < pickers.length; i++) {
+                for (int j = 0; j < orders.size(); j++) {
+
+//                    if(j==0)
+//                        pickersTimeAndCompleteByDiff = new Long[orders.size()][pickers.length];
+                    // order.CompleteBy - (picker time + order.pickingTime)
+                    long difference = orders.get(j).getCompleteBy().until(pickersTime.get(i).plus(orders.get(j).getPickingTime()), ChronoUnit.MINUTES);
+
+                    // fill with difference for each order
+                    pickersTimeAndCompleteByDiff[j][i] = difference;
+
+
+                    // if difference between (picking time + pickersTime) - orderCompleteBy == 0
+//                    if (difference == 0) {
+//                        // set start picking time
+//                        orders.get(j).setPickingStartTime(pickersTime.get(i));
+//                        // update List of pickersTime
+//                        pickersTime.set(i, pickersTime.get(i).plus(orders.get(j).getPickingTime()));
+//                        // save record in hashmap
+//                        if (!hashMap.containsKey(pickers[i])) {
+//                            hashMap.put(pickers[i], new ArrayList<>());
+//                        }
+//                        hashMap.get(pickers[i]).add(orders.get(j));
+//                        // remove order from orders <List>
+//                        orders.remove(j);
+////                        pickersTimeAndCompleteByDiff = null;
+////                        break;
+//
+//                        // else find min diff value from all orders
+//                    } else if (j == orders.size()) {
+////                        ArrayList<Integer> arrayList = getMaxValue(pickersTimeAndCompleteByDiff);
+//                        Long maxValue = pickersTimeAndCompleteByDiff[0][0];
+//
+//                            for (int l = 0; l < orders.size(); l++) {
+//                                // find index of first max value
+//                                if(pickersTimeAndCompleteByDiff[i][l ] > maxValue)
+//                                    maxValue = pickersTimeAndCompleteByDiff[l][i];
+//                            }
+//
+//
+////                        Map<Integer, Integer> maxValue = getMaxValue(pickersTimeAndCompleteByDiff);
+//                    }
+
+//                    if (orderArray.size() != orders.size())
+//                        orderArray.add(untils);
+//                    else
+//                        orderArray.set(j, untils);
+//                    if (orderArray.size() == orders.size()) {
+//                        for (int k = 0; k < orders.size(); k++) {
+//                            for (Long l : orderArray.get(k))
+//                                System.out.println(l);
+//                        }
+//
+//                        Long min = Collections.min(untils);
+//                        for (int k = 0; k < untils.size(); k++) {
+//                            if (untils.get(k) == min) {
+//                                // set start picking time
+//                                orders.get(j).setPickingStartTime(pickersTime.get(k));
+//                                // update List of pickersTime
+//                                pickersTime.set(k, pickersTime.get(k).plus(orders.get(j).getPickingTime()));
+//                                // save record in hashmap
+//                                if (!hashMap.containsKey(pickers[k]))
+//                                    hashMap.put(pickers[k], new ArrayList<>(List.of(orders.get(j))));
+//                                else
+//                                    hashMap.get(pickers[k]).add(orders.get(j));
+//                                orders.remove(j);
+//                            }
+//
+//
+//                        }
+//                    }
+//                    break
+                }
+            }
+            ArrayList<Long> max = new ArrayList<>(pickers.length);
+            for (int i = 0; i < orders.size(); i++) {
+                for (int j = 0; j < pickers.length; j++) {
+                    if (max.size() != pickers.length)
+                        max.add(pickersTimeAndCompleteByDiff[i][j]);
+                    else if (max.size() == pickers.length) {
+                        if (pickersTimeAndCompleteByDiff[i][j] > max.get(j))
+                            max.set(i, pickersTimeAndCompleteByDiff[i][j]);
+                    }
+
+                }
+
+            }
+            pickersTimeAndCompleteByDiff = null;
+        }
+
+        return null;
+    }
+
+    private static Map<Integer, Integer> getMaxValue(Long[][] numbers) {
+        Long maxValue = numbers[0][0];
+        HashMap<Integer, Integer> map = new HashMap<>();
+
+        //        int i, j;
+        for (int j = 0; j < numbers.length; j++) {
+            for (int i = 0; i < numbers[j].length; i++) {
+                if (numbers[j][i] > maxValue) {
+                    maxValue = numbers[j][i];
+                    map.put(j, i);
+                }
+            }
+        }
+        if (map.size() == 0)
+            map.put(0, 0);
+        return map;
+    }
+
     public static void ordersForPickers(Store store, TreeMap<LocalTime, ArrayList<Order>> orderMap) {
         Map<String, ArrayList<Order>> map = new HashMap<>();
         for (String picker : store.getPickers()) {
@@ -271,8 +419,8 @@ public class Main {
         Collection<ArrayList<Order>> orders = orderMap.values();
         List<Order> orderList = new ArrayList<>();
         List<Order> tempList = new ArrayList<>();
-        for(ArrayList<Order> order : orders)
-            for(Order o : order)
+        for (ArrayList<Order> order : orders)
+            for (Order o : order)
                 orderList.add(o);
 
         for (int i = 0; i < orderList.size(); i++) {
